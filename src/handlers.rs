@@ -162,6 +162,13 @@ pub fn handle_request(req: &RpcRequest, args: &Args) -> Value {
         "tools/call" => {
             if let Some(params) = &req.params {
                 if let Some(name) = params.get("name").and_then(|n| n.as_str()) {
+                    eprintln!("DEBUG: Handling tool call: {}", name);
+                    let empty_map = Map::new();
+                    let arguments = params
+                        .get("arguments")
+                        .and_then(|a| a.as_object())
+                        .unwrap_or(&empty_map);
+
                     match name {
                         "get_server_status" => {
                             let text = format!("Paradox Server Configuration:\n- Location: {}\n- Permit Editing: {}", args.location, args.permit_editing);
@@ -172,7 +179,7 @@ pub fn handle_request(req: &RpcRequest, args: &Args) -> Value {
                         "list_tables" => handle_list_tables(args),
                         "read_table_schema" => {
                             if let Some(table_name) =
-                                params.get("table_name").and_then(|t| t.as_str())
+                                arguments.get("table_name").and_then(|t| t.as_str())
                             {
                                 handle_read_schema(table_name, &args.location)
                             } else {
@@ -181,11 +188,13 @@ pub fn handle_request(req: &RpcRequest, args: &Args) -> Value {
                         }
                         "read_table_data" => {
                             if let Some(table_name) =
-                                params.get("table_name").and_then(|t| t.as_str())
+                                arguments.get("table_name").and_then(|t| t.as_str())
                             {
-                                let limit =
-                                    params.get("limit").and_then(|l| l.as_u64()).unwrap_or(100)
-                                        as i32;
+                                let limit = arguments
+                                    .get("limit")
+                                    .and_then(|l| l.as_u64())
+                                    .unwrap_or(100)
+                                    as i32;
                                 handle_read_data(table_name, &args.location, limit)
                             } else {
                                 json!({ "isError": true, "content": [{ "type": "text", "text": "Missing table_name" }] })
@@ -193,9 +202,10 @@ pub fn handle_request(req: &RpcRequest, args: &Args) -> Value {
                         }
                         "search_table" => {
                             if let Some(table_name) =
-                                params.get("table_name").and_then(|t| t.as_str())
+                                arguments.get("table_name").and_then(|t| t.as_str())
                             {
-                                if let Some(query) = params.get("query").and_then(|q| q.as_object())
+                                if let Some(query) =
+                                    arguments.get("query").and_then(|q| q.as_object())
                                 {
                                     handle_search_table(table_name, &args.location, query)
                                 } else {
@@ -210,10 +220,10 @@ pub fn handle_request(req: &RpcRequest, args: &Args) -> Value {
                                 return json!({ "isError": true, "content": [{ "type": "text", "text": "Editing is not permitted on this server." }] });
                             }
                             if let Some(table_name) =
-                                params.get("table_name").and_then(|t| t.as_str())
+                                arguments.get("table_name").and_then(|t| t.as_str())
                             {
                                 if let Some(fields) =
-                                    params.get("fields").and_then(|f| f.as_array())
+                                    arguments.get("fields").and_then(|f| f.as_array())
                                 {
                                     handle_create_table(table_name, &args.location, fields)
                                 } else {
@@ -228,10 +238,10 @@ pub fn handle_request(req: &RpcRequest, args: &Args) -> Value {
                                 return json!({ "isError": true, "content": [{ "type": "text", "text": "Editing is not permitted on this server." }] });
                             }
                             if let Some(table_name) =
-                                params.get("table_name").and_then(|t| t.as_str())
+                                arguments.get("table_name").and_then(|t| t.as_str())
                             {
                                 if let Some(record) =
-                                    params.get("record").and_then(|r| r.as_object())
+                                    arguments.get("record").and_then(|r| r.as_object())
                                 {
                                     handle_write_record(table_name, &args.location, None, record)
                                 } else {
@@ -246,14 +256,14 @@ pub fn handle_request(req: &RpcRequest, args: &Args) -> Value {
                                 return json!({ "isError": true, "content": [{ "type": "text", "text": "Editing is not permitted on this server." }] });
                             }
                             if let Some(table_name) =
-                                params.get("table_name").and_then(|t| t.as_str())
+                                arguments.get("table_name").and_then(|t| t.as_str())
                             {
-                                let index = params
+                                let index = arguments
                                     .get("index")
                                     .and_then(|i| i.as_u64())
                                     .map(|i| i as i32);
                                 if let Some(record) =
-                                    params.get("record").and_then(|r| r.as_object())
+                                    arguments.get("record").and_then(|r| r.as_object())
                                 {
                                     if let Some(idx) = index {
                                         handle_write_record(
@@ -436,6 +446,7 @@ fn handle_read_data(table_name: &str, location: &str, limit: i32) -> Value {
         for i in 0..count {
             if !pxlib::PX_get_record(pxdoc, i, buf.as_mut_ptr()).is_null() {
                 let mut record_map = Map::new();
+                let mut offset = 0;
                 for f_idx in 0..num_fields {
                     let f = &fields_slice[f_idx as usize];
                     let field_name = std::ffi::CStr::from_ptr(f.px_fname)
@@ -444,8 +455,11 @@ fn handle_read_data(table_name: &str, location: &str, limit: i32) -> Value {
                     let field_type = f.px_ftype;
                     let field_len = f.px_flen;
 
-                    let val = get_field_value(pxdoc, buf.as_mut_ptr(), field_type, field_len);
+                    let val =
+                        get_field_value(pxdoc, buf.as_mut_ptr().add(offset), field_type, field_len);
                     record_map.insert(field_name, val);
+
+                    offset += field_len as usize;
                 }
                 results.push(Value::Object(record_map));
             }
@@ -504,6 +518,7 @@ fn handle_search_table(table_name: &str, location: &str, query: &Map<String, Val
                 let mut record_map = Map::new();
                 let mut matches = true;
 
+                let mut offset = 0;
                 for f_idx in 0..num_fields {
                     let f = &fields_slice[f_idx as usize];
                     let field_name = std::ffi::CStr::from_ptr(f.px_fname)
@@ -512,7 +527,8 @@ fn handle_search_table(table_name: &str, location: &str, query: &Map<String, Val
                     let field_type = f.px_ftype;
                     let field_len = f.px_flen;
 
-                    let val = get_field_value(pxdoc, buf.as_mut_ptr(), field_type, field_len);
+                    let val =
+                        get_field_value(pxdoc, buf.as_mut_ptr().add(offset), field_type, field_len);
 
                     if let Some(query_val) = query.get(&field_name) {
                         if !compare_values(&val, query_val) {
@@ -520,6 +536,8 @@ fn handle_search_table(table_name: &str, location: &str, query: &Map<String, Val
                         }
                     }
                     record_map.insert(field_name, val);
+
+                    offset += field_len as usize;
                 }
 
                 if matches {
@@ -551,16 +569,29 @@ fn handle_create_table(table_name: &str, location: &str, fields: &Vec<Value>) ->
 
     let path_str = full_path.to_string_lossy();
 
+    #[repr(C)]
+    struct PxField {
+        px_fname: *mut std::os::raw::c_char,
+        px_ftype: std::os::raw::c_char,
+        px_flen: std::os::raw::c_int,
+        px_fdc: std::os::raw::c_int,
+    }
+
+    extern "C" {
+        fn malloc(size: usize) -> *mut std::ffi::c_void;
+        fn strdup(s: *const std::os::raw::c_char) -> *mut std::os::raw::c_char;
+    }
+
     unsafe {
         let pxdoc = pxlib::PX_new();
         if pxdoc.is_null() {
             return json!({ "isError": true, "content": [{ "type": "text", "text": "Failed to initialize PX library." }] });
         }
 
-        let mut px_fields = Vec::new();
-        let mut c_names = Vec::new();
+        let fields_byte_size = std::mem::size_of::<PxField>() * fields.len();
+        let px_fields_ptr = malloc(fields_byte_size) as *mut PxField;
 
-        for f_val in fields {
+        for (i, f_val) in fields.iter().enumerate() {
             let name_str = f_val
                 .get("name")
                 .and_then(|v| v.as_str())
@@ -571,8 +602,10 @@ fn handle_create_table(table_name: &str, location: &str, fields: &Vec<Value>) ->
                 .unwrap_or("ALPHA");
             let length = f_val.get("length").and_then(|v| v.as_i64()).unwrap_or(0) as i32;
 
+            // Allocate string using C's strdup so pxlib can free it
             let c_name =
                 CString::new(name_str).unwrap_or_else(|_| CString::new("INVALID").unwrap());
+            let c_name_ptr = strdup(c_name.as_ptr());
 
             let f_type = match type_str.to_uppercase().as_str() {
                 "ALPHA" => pxlib::pxfAlpha,
@@ -592,13 +625,28 @@ fn handle_create_table(table_name: &str, location: &str, fields: &Vec<Value>) ->
                 _ => pxlib::pxfAlpha,
             };
 
-            px_fields.push(pxlib::px_field {
-                px_fname: c_name.as_ptr() as *mut std::os::raw::c_char,
-                px_ftype: f_type as std::os::raw::c_char,
-                px_flen: length,
-                px_fdc: 0,
-            });
-            c_names.push(c_name);
+            let final_length = if length > 0 {
+                length
+            } else {
+                match f_type as u32 {
+                    pxlib::pxfShort => 2,
+                    pxlib::pxfLong | pxlib::pxfAutoInc | pxlib::pxfDate | pxlib::pxfTime => 4,
+                    pxlib::pxfCurrency | pxlib::pxfNumber | pxlib::pxfTimestamp => 8,
+                    pxlib::pxfLogical => 1,
+                    _ => 0,
+                }
+            };
+
+            // Write into the malloc'd array directly to avoid double free
+            std::ptr::write(
+                px_fields_ptr.add(i),
+                PxField {
+                    px_fname: c_name_ptr,
+                    px_ftype: f_type as std::os::raw::c_char,
+                    px_flen: final_length,
+                    px_fdc: 0,
+                },
+            );
         }
 
         let c_path = match CString::new(path_str.as_ref()) {
@@ -609,21 +657,23 @@ fn handle_create_table(table_name: &str, location: &str, fields: &Vec<Value>) ->
             }
         };
 
-        // File type 0 = pxfFileTypIndexDB (which seems to be the one for .db as per our grep)
+        // File type 0 = pxfFileTypIndexDB
         let res = pxlib::PX_create_file(
             pxdoc,
-            px_fields.as_mut_ptr(),
-            px_fields.len() as i32,
+            px_fields_ptr as *mut pxlib::pxfield_t,
+            fields.len() as i32,
             c_path.as_ptr(),
             0,
         );
 
+        // We MUST close the document to ensure the header and data are flushed.
         pxlib::PX_close(pxdoc);
+        // Delete frees pxdoc and its internal pointers (like the fields array we allocated with malloc).
         pxlib::PX_delete(pxdoc);
 
         if res >= 0 {
             json!({
-                "content": [{ "type": "text", "text": format!("Successfully created table '{}' with {} fields.", table_name, px_fields.len()) }]
+                "content": [{ "type": "text", "text": format!("Successfully created table '{}' with {} fields.", table_name, fields.len()) }]
             })
         } else {
             json!({
@@ -680,6 +730,7 @@ fn handle_write_record(
             }
         }
 
+        let mut offset = 0;
         for f_idx in 0..num_fields {
             let f = &fields_slice[f_idx as usize];
             let field_name = std::ffi::CStr::from_ptr(f.px_fname)
@@ -689,8 +740,12 @@ fn handle_write_record(
             let field_len = f.px_flen;
 
             if let Some(val) = record_data.get(&field_name) {
-                put_field_value(pxdoc, buf.as_mut_ptr(), field_type, field_len, val);
+                // Add the offset to the base buffer pointer
+                let field_ptr = buf.as_mut_ptr().add(offset as usize);
+                put_field_value(pxdoc, field_ptr, field_type, field_len, val);
             }
+
+            offset += field_len;
         }
 
         let res = if let Some(idx) = index {

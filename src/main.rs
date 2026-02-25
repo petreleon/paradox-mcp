@@ -24,17 +24,22 @@ fn main() {
         if let Ok(line) = line_result {
             if let Ok(req) = serde_json::from_str::<RpcRequest>(&line) {
                 if let Some(id) = req.id.clone() {
+                    let result = handlers::handle_request(&req, &args);
+                    eprintln!("DEBUG: Handler result for ID {}: {:?}", id, result);
                     let response = RpcResponse {
                         jsonrpc: "2.0".to_string(),
                         id,
-                        result: Some(handlers::handle_request(&req, &args)),
+                        result: Some(result),
                         error: None,
                     };
                     if let Ok(json_response) = serde_json::to_string(&response) {
+                        eprintln!("DEBUG: Sending response: {}", json_response);
                         writeln!(stdout, "{}", json_response).unwrap();
                         stdout.flush().unwrap();
                     }
                 }
+            } else {
+                eprintln!("DEBUG: Failed to parse request: {}", line);
             }
         }
     }
