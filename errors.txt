@@ -1,0 +1,342 @@
+    Updating crates.io index
+ Downloading crates ...
+  Downloaded anstyle-parse v0.2.7
+  Downloaded bitflags v2.11.0
+  Downloaded cfg-if v1.0.4
+  Downloaded colorchoice v1.0.4
+  Downloaded anstyle-query v1.1.5
+  Downloaded which v4.4.2
+  Downloaded heck v0.5.0
+  Downloaded errno v0.3.14
+  Downloaded lazy_static v1.5.0
+  Downloaded rustc-hash v1.1.0
+  Downloaded home v0.5.12
+  Downloaded scopeguard v1.2.0
+  Downloaded lazycell v1.3.0
+  Downloaded is_terminal_polyfill v1.70.2
+  Downloaded itoa v1.0.17
+  Downloaded utf8parse v0.2.2
+  Downloaded strsim v0.11.1
+  Downloaded clap_lex v1.0.0
+  Downloaded cexpr v0.6.0
+  Downloaded either v1.15.0
+  Downloaded signal-hook-registry v1.4.8
+  Downloaded zmij v1.0.21
+  Downloaded glob v0.3.3
+  Downloaded shlex v1.3.0
+  Downloaded pin-project-lite v0.2.16
+  Downloaded libloading v0.8.9
+  Downloaded clap_derive v4.5.55
+  Downloaded anstyle v1.0.13
+  Downloaded anstream v0.6.21
+  Downloaded quote v1.0.44
+  Downloaded tokio-macros v2.6.0
+  Downloaded clang-sys v1.8.1
+  Downloaded parking_lot v0.12.5
+  Downloaded lock_api v0.4.14
+  Downloaded parking_lot_core v0.9.12
+  Downloaded serde_core v1.0.228
+  Downloaded serde_derive v1.0.228
+  Downloaded log v0.4.29
+  Downloaded socket2 v0.6.2
+  Downloaded smallvec v1.15.1
+  Downloaded proc-macro2 v1.0.106
+  Downloaded clap v4.5.60
+  Downloaded unicode-ident v1.0.24
+  Downloaded bytes v1.11.1
+  Downloaded prettyplease v0.2.37
+  Downloaded memchr v2.8.0
+  Downloaded mio v1.1.1
+  Downloaded serde v1.0.228
+  Downloaded nom v7.1.3
+  Downloaded minimal-lexical v0.2.1
+  Downloaded itertools v0.12.1
+  Downloaded regex v1.12.3
+  Downloaded clap_builder v4.5.60
+  Downloaded aho-corasick v1.1.4
+  Downloaded serde_json v1.0.149
+  Downloaded bindgen v0.69.5
+  Downloaded syn v2.0.117
+  Downloaded regex-syntax v0.8.10
+  Downloaded rustix v0.38.44
+  Downloaded regex-automata v0.4.14
+  Downloaded libc v0.2.182
+  Downloaded tokio v1.49.0
+  Downloaded linux-raw-sys v0.4.15
+    Checking paradox-mcp v0.1.0 (/app)
+error[E0425]: cannot find function, tuple struct or tuple variant `PX_get_error_message` in module `pxlib`
+   --> src/main.rs:243:36
+    |
+243 | ...xlib::PX_get_error_message(pxdoc);
+    |          ^^^^^^^^^^^^^^^^^^^^ not found in `pxlib`
+
+error[E0425]: cannot find function, tuple struct or tuple variant `PX_get_error_message` in module `pxlib`
+   --> src/main.rs:332:36
+    |
+332 | ...xlib::PX_get_error_message(pxdoc);
+    |          ^^^^^^^^^^^^^^^^^^^^ not found in `pxlib`
+
+error[E0425]: cannot find function, tuple struct or tuple variant `PX_get_record_size` in module `pxlib`
+   --> src/main.rs:349:34
+    |
+349 |         let record_size = pxlib::PX_get_record_size(pxdoc);
+    |                                  ^^^^^^^^^^^^^^^^^^ help: a function with a similar name exists: `PX_get_recordsize`
+    |
+   ::: /app/target/debug/build/paradox-mcp-12b7185a6e32a211/out/bindings.rs:3:79000
+    |
+  3 | ... { pub fn PX_get_recordsize (pxdoc : * mut pxdoc_t) -> :: std :: os :: raw :: c_int ; } ...
+    |       ---------------------------------------------------------------------------------- similarly named function `PX_get_recordsize` defined here
+
+error[E0425]: cannot find function, tuple struct or tuple variant `PX_free` in module `pxlib`
+   --> src/main.rs:386:40
+    |
+386 | ...   pxlib::PX_free(pxdoc, val_ptr as *mut std::ffi::c_v...
+    |              ^^^^^^^ not found in `pxlib`
+
+error[E0599]: no method named `is_null` found for struct `px_field` in the current scope
+   --> src/main.rs:263:27
+    |
+263 |                 if !f_ptr.is_null() {
+    |                           ^^^^^^^ method not found in `px_field`
+    |
+   ::: /app/target/debug/build/paradox-mcp-12b7185a6e32a211/out/bindings.rs:3:34145
+    |
+  3 | ...py , Clone)] pub struct px_field { pub px_fname : * mu...
+    |                 ------------------- method `is_null` not found for this struct
+    |
+help: one of the expressions' fields has a method of the same name
+    |
+263 |                 if !f_ptr.px_fname.is_null() {
+    |                           +++++++++
+
+error[E0614]: type `px_field` cannot be dereferenced
+   --> src/main.rs:264:57
+    |
+264 | ...r::from_ptr((*f_ptr).fname)
+    |                ^^^^^^^^ can't be dereferenced
+
+error[E0614]: type `px_field` cannot be dereferenced
+   --> src/main.rs:267:33
+    |
+267 |                     let ftype = (*f_ptr).ftype;
+    |                                 ^^^^^^^^ can't be dereferenced
+
+error[E0614]: type `px_field` cannot be dereferenced
+   --> src/main.rs:268:32
+    |
+268 |                     let flen = (*f_ptr).flen;
+    |                                ^^^^^^^^ can't be dereferenced
+
+error[E0308]: mismatched types
+   --> src/main.rs:360:47
+    |
+360 | ...if pxlib::PX_get_record(pxdoc, i, buf.as_mut_ptr() as *mut i8) >...
+    |       --------------------           ^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `*mut u8`, found `*mut i8`
+    |       |
+    |       arguments to this function are incorrect
+    |
+    = note: expected raw pointer `*mut u8`
+               found raw pointer `*mut i8`
+note: function defined here
+   --> /app/target/debug/build/paradox-mcp-12b7185a6e32a211/out/bindings.rs:3:77075
+    |
+  3 | ...fn PX_get_record (pxdoc : * mut pxdoc_t , recno : :: std :: os :: raw :: c_int , data : ...
+    |       ^^^^^^^^^^^^^                                                                 ----
+
+error[E0308]: mismatched types
+   --> src/main.rs:360:79
+    |
+360 | ...if pxlib::PX_get_record(pxdoc, i, buf.as_mut_ptr() as *mut i8) >= 0 {
+    |       -----------------------------------------------------------    ^ expected `*mut u8`, found `usize`
+    |       |
+    |       expected because this is `*mut u8`
+    |
+    = note: expected raw pointer `*mut u8`
+                      found type `usize`
+help: if you meant to create a null pointer, use `std::ptr::null_mut()`
+    |
+360 -             if pxlib::PX_get_record(pxdoc, i, buf.as_mut_ptr() as *mut i8) >= 0 {
+360 +             if pxlib::PX_get_record(pxdoc, i, buf.as_mut_ptr() as *mut i8) >= std::ptr::null_mut() {
+    |
+
+error[E0614]: type `px_field` cannot be dereferenced
+   --> src/main.rs:363:33
+    |
+363 | ... f_ptr = *fields_slice[f_idx as usize];
+    |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ can't be dereferenced
+
+error[E0061]: this function takes 4 arguments but 5 arguments were supplied
+   --> src/main.rs:374:32
+    |
+374 | ...                   if pxlib::PX_get_data_alpha(
+    |                          ^^^^^^^^^^^^^^^^^^^^^^^^
+...
+379 | ...                       &mut val_ptr,
+    |                           ------------ unexpected argument #5 of type `&mut *mut i8`
+    |
+note: expected `*mut u8`, found `*mut i8`
+   --> src/main.rs:376:33
+    |
+376 | ...                   buf.as_mut_ptr() as *mut i8,
+    |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    = note: expected raw pointer `*mut u8`
+               found raw pointer `*mut i8`
+note: expected `*mut *mut u8`, found `&mut i32`
+   --> src/main.rs:378:33
+    |
+378 | ...                   &mut isnull,
+    |                       ^^^^^^^^^^^
+    = note:    expected raw pointer `*mut *mut u8`
+            found mutable reference `&mut i32`
+note: function defined here
+   --> /app/target/debug/build/paradox-mcp-12b7185a6e32a211/out/bindings.rs:3:82211
+    |
+  3 | ...fn PX_get_data_alpha (pxdoc : * mut pxdoc_t , data : * mut :: std :: os :: raw :: c_char , len : :: std :: os :: raw :: c_int , value : ...
+    |       ^^^^^^^^^^^^^^^^^                          ----                                                                              -----
+help: remove the extra argument
+    |
+376 ~                                 /* *mut u8 */,
+377 |                                 field_len,
+378 ~                                 /* *mut *mut u8 */,
+    |
+
+error[E0308]: mismatched types
+   --> src/main.rs:383:66
+    |
+383 | ... let s = std::ffi::CStr::from_ptr(val_ptr)
+    |             ------------------------ ^^^^^^^ expected `*const u8`, found `*mut i8`
+    |             |
+    |             arguments to this function are incorrect
+    |
+    = note: expected raw pointer `*const u8`
+               found raw pointer `*mut i8`
+note: associated function defined here
+   --> /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/core/src/ffi/c_str.rs:253:25
+
+error[E0061]: this function takes 4 arguments but 5 arguments were supplied
+   --> src/main.rs:394:32
+    |
+394 | ...                   if pxlib::PX_get_data_short(
+    |                          ^^^^^^^^^^^^^^^^^^^^^^^^
+...
+398 | ...                       &mut isnull,
+    |                           ----------- unexpected argument #4 of type `&mut i32`
+    |
+note: expected `*mut u8`, found `*mut i8`
+   --> src/main.rs:396:33
+    |
+396 | ...                   buf.as_mut_ptr() as *mut i8,
+    |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    = note: expected raw pointer `*mut u8`
+               found raw pointer `*mut i8`
+note: function defined here
+   --> /app/target/debug/build/paradox-mcp-12b7185a6e32a211/out/bindings.rs:3:83101
+    |
+  3 | ...fn PX_get_data_short (pxdoc : * mut pxdoc_t , data : *...
+    |       ^^^^^^^^^^^^^^^^^                          ----
+help: remove the extra argument
+    |
+396 ~                                 /* *mut u8 */,
+397 ~                                 field_len,
+    |
+
+error[E0061]: this function takes 4 arguments but 5 arguments were supplied
+   --> src/main.rs:410:32
+    |
+410 | ...                   if pxlib::PX_get_data_long(
+    |                          ^^^^^^^^^^^^^^^^^^^^^^^
+...
+415 | ...                       &mut v,
+    |                           ------ unexpected argument #5 of type `&mut i32`
+    |
+note: expected `*mut u8`, found `*mut i8`
+   --> src/main.rs:412:33
+    |
+412 | ...                   buf.as_mut_ptr() as *mut i8,
+    |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    = note: expected raw pointer `*mut u8`
+               found raw pointer `*mut i8`
+note: expected `*mut i64`, found `&mut i32`
+   --> src/main.rs:414:33
+    |
+414 | ...                   &mut isnull,
+    |                       ^^^^^^^^^^^
+    = note:    expected raw pointer `*mut i64`
+            found mutable reference `&mut i32`
+note: function defined here
+   --> /app/target/debug/build/paradox-mcp-12b7185a6e32a211/out/bindings.rs:3:82876
+    |
+  3 | ...fn PX_get_data_long (pxdoc : * mut pxdoc_t , data : * mut :: std :: os :: raw :: c_char , len : :: std :: os :: raw :: c_int , value : ...
+    |       ^^^^^^^^^^^^^^^^                          ----                                                                              -----
+help: remove the extra argument
+    |
+412 ~                                 /* *mut u8 */,
+413 |                                 field_len,
+414 ~                                 /* *mut i64 */,
+    |
+
+error[E0061]: this function takes 4 arguments but 5 arguments were supplied
+   --> src/main.rs:426:32
+    |
+426 | ...                   if pxlib::PX_get_data_double(
+    |                          ^^^^^^^^^^^^^^^^^^^^^^^^^
+...
+430 | ...                       &mut isnull,
+    |                           ----------- unexpected argument #4 of type `&mut i32`
+    |
+note: expected `*mut u8`, found `*mut i8`
+   --> src/main.rs:428:33
+    |
+428 | ...                   buf.as_mut_ptr() as *mut i8,
+    |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    = note: expected raw pointer `*mut u8`
+               found raw pointer `*mut i8`
+note: function defined here
+   --> /app/target/debug/build/paradox-mcp-12b7185a6e32a211/out/bindings.rs:3:82675
+    |
+  3 | ...fn PX_get_data_double (pxdoc : * mut pxdoc_t , data : ...
+    |       ^^^^^^^^^^^^^^^^^^                          ----
+help: remove the extra argument
+    |
+428 ~                                 /* *mut u8 */,
+429 ~                                 field_len,
+    |
+
+error[E0061]: this function takes 4 arguments but 5 arguments were supplied
+   --> src/main.rs:442:32
+    |
+442 | ...                   if pxlib::PX_get_data_byte(
+    |                          ^^^^^^^^^^^^^^^^^^^^^^^
+...
+447 | ...                       &mut v,
+    |                           ------ unexpected argument #5 of type `&mut i8`
+    |
+note: expected `*mut u8`, found `*mut i8`
+   --> src/main.rs:444:33
+    |
+444 | ...                   buf.as_mut_ptr() as *mut i8,
+    |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    = note: expected raw pointer `*mut u8`
+               found raw pointer `*mut i8`
+note: expected `*mut u8`, found `&mut i32`
+   --> src/main.rs:446:33
+    |
+446 | ...                   &mut isnull,
+    |                       ^^^^^^^^^^^
+    = note:    expected raw pointer `*mut u8`
+            found mutable reference `&mut i32`
+note: function defined here
+   --> /app/target/debug/build/paradox-mcp-12b7185a6e32a211/out/bindings.rs:3:83328
+    |
+  3 | ...fn PX_get_data_byte (pxdoc : * mut pxdoc_t , data : * mut :: std :: os :: raw :: c_char , len : :: std :: os :: raw :: c_int , value : ...
+    |       ^^^^^^^^^^^^^^^^                          ----                                                                              -----
+help: remove the extra argument
+    |
+444 ~                                 /* *mut u8 */,
+445 |                                 field_len,
+446 ~                                 /* *mut u8 */,
+    |
+
+Some errors have detailed explanations: E0061, E0308, E0425, E0599, E0614.
+For more information about an error, try `rustc --explain E0061`.
+error: could not compile `paradox-mcp` (bin "paradox-mcp") due to 17 previous errors
